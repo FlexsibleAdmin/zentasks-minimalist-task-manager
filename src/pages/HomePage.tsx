@@ -2,7 +2,6 @@ import React, { useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Layout, Zap, CheckCircle2, ListTodo, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Toaster, toast } from 'sonner';
@@ -10,6 +9,7 @@ import { Toaster, toast } from 'sonner';
 import { TaskInput } from '@/components/zen/TaskInput';
 import { TaskItem } from '@/components/zen/TaskItem';
 import { FocusMode } from '@/components/zen/FocusMode';
+import { SettingsPanel } from '@/components/zen/SettingsPanel';
 // Store
 import { useTaskStore } from '@/store/taskStore';
 // Animations
@@ -18,6 +18,7 @@ export function HomePage() {
   // Zustand Selectors (Primitive values only)
   const tasks = useTaskStore((s) => s.tasks);
   const isFocusMode = useTaskStore((s) => s.isFocusMode);
+  const isZenMode = useTaskStore((s) => s.isZenMode);
   const isLoading = useTaskStore((s) => s.isLoading);
   const fetchTasks = useTaskStore((s) => s.fetchTasks);
   const addTask = useTaskStore((s) => s.addTask);
@@ -56,18 +57,20 @@ export function HomePage() {
   // Get top priority task for focus mode
   const focusTask = activeTasks[0];
   return (
-    <AppLayout container={false} className="bg-background min-h-screen">
+    <AppLayout container={false} className="bg-background min-h-screen transition-colors duration-500">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 min-h-screen flex flex-col">
         {/* Header Actions */}
         <header className="flex items-center justify-between mb-8 md:mb-12">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Layout className="w-5 h-5 text-primary-foreground" />
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-500 ${isZenMode ? 'bg-muted text-muted-foreground' : 'bg-primary text-primary-foreground'}`}>
+              <Layout className="w-5 h-5" />
             </div>
-            <span className="font-bold text-xl tracking-tight">ZenTasks</span>
+            <span className={`font-bold text-xl tracking-tight transition-opacity duration-500 ${isZenMode ? 'opacity-50' : 'opacity-100'}`}>
+              ZenTasks
+            </span>
           </div>
           <div className="flex items-center gap-2">
-            <ThemeToggle className="relative top-0 right-0" />
+            <SettingsPanel />
           </div>
         </header>
         <AnimatePresence mode="wait">
@@ -91,47 +94,60 @@ export function HomePage() {
               exit="exit"
               className="flex-1 flex flex-col"
             >
-              {/* Welcome & Progress */}
-              <motion.div variants={slideUp} className="mb-10 space-y-6">
-                <div className="space-y-2">
-                  <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                    Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}
-                  </h1>
-                  <p className="text-muted-foreground text-lg">
-                    You have {activeTasks.length} active {activeTasks.length === 1 ? 'task' : 'tasks'} today.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm font-medium text-muted-foreground">
-                    <span>Daily Progress</span>
-                    <span>{progress}%</span>
-                  </div>
-                  <Progress value={progress} className="h-2" />
-                </div>
-                <div className="flex gap-3 pt-2">
-                  <Button
-                    onClick={() => setFocusMode(true)}
-                    className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/20 border-0"
-                    disabled={activeTasks.length === 0}
+              {/* Welcome & Progress - Hidden in Zen Mode */}
+              <AnimatePresence>
+                {!isZenMode && (
+                  <motion.div 
+                    variants={slideUp}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    className="mb-10 space-y-6"
                   >
-                    <Zap className="w-4 h-4 mr-2 fill-current" />
-                    Enter Focus Mode
-                  </Button>
-                  {completedTasks.length > 0 && (
-                    <Button
-                      variant="outline"
-                      onClick={clearCompleted}
-                      className="flex-none"
-                      title="Clear completed tasks"
-                    >
-                      <CheckCircle2 className="w-4 h-4 mr-2" />
-                      Clear Done
-                    </Button>
-                  )}
-                </div>
-              </motion.div>
+                    <div className="space-y-2">
+                      <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                        Good {new Date().getHours() < 12 ? 'Morning' : new Date().getHours() < 18 ? 'Afternoon' : 'Evening'}
+                      </h1>
+                      <p className="text-muted-foreground text-lg">
+                        You have {activeTasks.length} active {activeTasks.length === 1 ? 'task' : 'tasks'} today.
+                      </p>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm font-medium text-muted-foreground">
+                        <span>Daily Progress</span>
+                        <span>{progress}%</span>
+                      </div>
+                      <Progress value={progress} className="h-2" />
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <Button
+                        onClick={() => setFocusMode(true)}
+                        className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/20 border-0"
+                        disabled={activeTasks.length === 0}
+                      >
+                        <Zap className="w-4 h-4 mr-2 fill-current" />
+                        Enter Focus Mode
+                      </Button>
+                      {completedTasks.length > 0 && (
+                        <Button
+                          variant="outline"
+                          onClick={clearCompleted}
+                          className="flex-none"
+                          title="Clear completed tasks"
+                        >
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                          Clear Done
+                        </Button>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
               {/* Input */}
-              <motion.div variants={slideUp} className="mb-8 sticky top-4 z-10">
+              <motion.div 
+                variants={slideUp} 
+                className={`mb-8 sticky top-4 z-10 transition-all duration-500 ${isZenMode ? 'pt-12' : ''}`}
+              >
                 <TaskInput onAdd={handleAddTask} />
               </motion.div>
               {/* Task List */}

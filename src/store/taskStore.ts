@@ -6,6 +6,7 @@ export type { Task };
 interface TaskState {
   tasks: Task[];
   isFocusMode: boolean;
+  isZenMode: boolean;
   isLoading: boolean;
   error: string | null;
   // Actions
@@ -14,11 +15,14 @@ interface TaskState {
   toggleTask: (id: string) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   setFocusMode: (isFocus: boolean) => void;
+  toggleZenMode: () => void;
   clearCompleted: () => Promise<void>;
+  deleteAllTasks: () => Promise<void>;
 }
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
   isFocusMode: false,
+  isZenMode: false,
   isLoading: false,
   error: null,
   fetchTasks: async () => {
@@ -113,6 +117,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     }
   },
   setFocusMode: (isFocus: boolean) => set({ isFocusMode: isFocus }),
+  toggleZenMode: () => set((state) => ({ isZenMode: !state.isZenMode })),
   clearCompleted: async () => {
     // Optimistic update
     set((state) => ({
@@ -132,4 +137,21 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       console.error('Network error clearing completed:', err);
     }
   },
+  deleteAllTasks: async () => {
+    // Optimistic update
+    set({ tasks: [] });
+    try {
+      const res = await fetch('/api/tasks/all', {
+        method: 'DELETE',
+      });
+      const data = await res.json() as ApiResponse<Task[]>;
+      if (!data.success) {
+        console.error('Failed to sync delete all tasks:', data.error);
+      } else if (data.data) {
+          set({ tasks: data.data });
+      }
+    } catch (err) {
+      console.error('Network error deleting all tasks:', err);
+    }
+  }
 }));

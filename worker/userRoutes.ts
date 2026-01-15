@@ -67,6 +67,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         const data = await stub.clearCompletedTasks();
         return c.json({ success: true, data } satisfies ApiResponse<Task[]>);
     });
+    app.delete('/api/tasks/all', async (c) => {
+        const stub = c.env.GlobalDurableObject.get(c.env.GlobalDurableObject.idFromName("global"));
+        const data = await stub.deleteAllTasks();
+        return c.json({ success: true, data } satisfies ApiResponse<Task[]>);
+    });
     app.delete('/api/tasks/:id', async (c) => {
         const id = c.req.param('id');
         const stub = c.env.GlobalDurableObject.get(c.env.GlobalDurableObject.idFromName("global"));

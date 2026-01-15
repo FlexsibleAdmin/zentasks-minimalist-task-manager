@@ -77,4 +77,9 @@ export class GlobalDurableObject extends DurableObject {
         await this.ctx.storage.put("tasks", updatedTasks);
         return updatedTasks;
     }
+    async deleteAllTasks(): Promise<Task[]> {
+        const emptyTasks: Task[] = [];
+        await this.ctx.storage.put("tasks", emptyTasks);
+        return emptyTasks;
+    }
 }
