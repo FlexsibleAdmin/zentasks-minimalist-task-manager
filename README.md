@@ -1,6 +1,6 @@
 # ZenTasks - Minimalist Task Manager
 
-[aureliabutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/FlexsibleAdmin/zentasks-minimalist-task-manager)
 
 ZenTasks is a visually stunning, minimalist task management application designed to bring clarity and focus to daily planning. Built on the Aurelia platform using Cloudflare Workers and Durable Objects, it leverages a serverless architecture for instant syncing and persistence.
 
@@ -83,7 +83,7 @@ bun run lint
 
 This project is configured for seamless deployment to the Cloudflare network.
 
-[aureliabutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/FlexsibleAdmin/zentasks-minimalist-task-manager)
 
 ### Manual Deployment
 
