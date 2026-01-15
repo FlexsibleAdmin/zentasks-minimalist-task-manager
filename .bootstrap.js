@@ -77,7 +77,10 @@ function updateWranglerJsonc() {
 }
 
 function runSetupCommands() {
-    const commands = [];
+    const commands = [
+    "bun add @dnd-kit/modifiers@^9.0.0",
+    "bun add @dnd-kit/utilities@^3.2.2"
+];
     
     if (commands.length === 0) {
         console.log('⊘ No setup commands to run');
