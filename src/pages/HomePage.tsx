@@ -1,7 +1,6 @@
 import React, { useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Layout, Zap, CheckCircle2, ListTodo, Loader2 } from 'lucide-react';
-import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Toaster, toast } from 'sonner';
@@ -57,7 +56,7 @@ export function HomePage() {
   // Get top priority task for focus mode
   const focusTask = activeTasks[0];
   return (
-    <AppLayout container={false} className="bg-background min-h-screen transition-colors duration-500">
+    <div className="bg-background min-h-screen transition-colors duration-500">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 min-h-screen flex flex-col">
         {/* Header Actions */}
         <header className="flex items-center justify-between mb-8 md:mb-12">
@@ -97,7 +96,7 @@ export function HomePage() {
               {/* Welcome & Progress - Hidden in Zen Mode */}
               <AnimatePresence>
                 {!isZenMode && (
-                  <motion.div 
+                  <motion.div
                     variants={slideUp}
                     initial="hidden"
                     animate="visible"
@@ -144,8 +143,8 @@ export function HomePage() {
                 )}
               </AnimatePresence>
               {/* Input */}
-              <motion.div 
-                variants={slideUp} 
+              <motion.div
+                variants={slideUp}
                 className={`mb-8 sticky top-4 z-10 transition-all duration-500 ${isZenMode ? 'pt-12' : ''}`}
               >
                 <TaskInput onAdd={handleAddTask} />
@@ -210,6 +209,6 @@ export function HomePage() {
         </AnimatePresence>
       </div>
       <Toaster position="bottom-center" />
-    </AppLayout>
+    </div>
   );
 }
