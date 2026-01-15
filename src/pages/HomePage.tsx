@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Layout, Zap, CheckCircle2, ListTodo } from 'lucide-react';
+import { Layout, Zap, CheckCircle2, ListTodo, Loader2 } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from '@/components/ui/button';
@@ -18,11 +18,17 @@ export function HomePage() {
   // Zustand Selectors (Primitive values only)
   const tasks = useTaskStore((s) => s.tasks);
   const isFocusMode = useTaskStore((s) => s.isFocusMode);
+  const isLoading = useTaskStore((s) => s.isLoading);
+  const fetchTasks = useTaskStore((s) => s.fetchTasks);
   const addTask = useTaskStore((s) => s.addTask);
   const toggleTask = useTaskStore((s) => s.toggleTask);
   const deleteTask = useTaskStore((s) => s.deleteTask);
   const setFocusMode = useTaskStore((s) => s.setFocusMode);
   const clearCompleted = useTaskStore((s) => s.clearCompleted);
+  // Initial Fetch
+  useEffect(() => {
+    fetchTasks();
+  }, [fetchTasks]);
   // Derived State
   const activeTasks = useMemo(() => tasks.filter(t => !t.completed), [tasks]);
   const completedTasks = useMemo(() => tasks.filter(t => t.completed), [tasks]);
@@ -66,18 +72,12 @@ export function HomePage() {
         </header>
         <AnimatePresence mode="wait">
           {isFocusMode ? (
-            <FocusMode 
+            <FocusMode
               key="focus-mode"
               task={focusTask}
               onComplete={handleFocusComplete}
               onExit={() => setFocusMode(false)}
               onSkip={() => {
-                // Simple skip logic: move current top task to bottom of active list?
-                // For now, just exit or maybe we can implement reorder later.
-                // Let's just exit for MVP or maybe show a toast "Skipping not implemented yet"
-                // Actually, let's just rotate it in the store if we had reorder.
-                // For this phase, let's just exit focus mode or show next.
-                // Since we don't have reorder in store yet, we'll just exit.
                 toast.info("Returning to list view");
                 setFocusMode(false);
               }}
@@ -109,7 +109,7 @@ export function HomePage() {
                   <Progress value={progress} className="h-2" />
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <Button 
+                  <Button
                     onClick={() => setFocusMode(true)}
                     className="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg shadow-indigo-500/20 border-0"
                     disabled={activeTasks.length === 0}
@@ -118,8 +118,8 @@ export function HomePage() {
                     Enter Focus Mode
                   </Button>
                   {completedTasks.length > 0 && (
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       onClick={clearCompleted}
                       className="flex-none"
                       title="Clear completed tasks"
@@ -136,6 +136,12 @@ export function HomePage() {
               </motion.div>
               {/* Task List */}
               <motion.div variants={fadeIn} className="space-y-8 flex-1">
+                {/* Loading State */}
+                {isLoading && tasks.length === 0 && (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                  </div>
+                )}
                 {/* Active Tasks */}
                 <div className="space-y-3">
                   <AnimatePresence mode="popLayout" initial={false}>
@@ -148,9 +154,9 @@ export function HomePage() {
                       />
                     ))}
                   </AnimatePresence>
-                  {activeTasks.length === 0 && completedTasks.length === 0 && (
-                    <motion.div 
-                      initial={{ opacity: 0 }} 
+                  {!isLoading && activeTasks.length === 0 && completedTasks.length === 0 && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       className="text-center py-12 text-muted-foreground"
                     >
